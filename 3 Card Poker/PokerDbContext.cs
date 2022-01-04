@@ -14,6 +14,17 @@ namespace _3_Card_Poker
             builder.Entity<Player>(p =>
             {
                 p.ToTable("Players");
+                p.HasKey(p => p.Id);
+                p.Property(p => p.Name);
+                p.Property(p => p.Balance);
+            });
+            builder.Entity<Card>(p =>
+            {
+                p.ToTable("Cards");
+                p.HasKey(p => p.Id);
+                p.Property(p => p.Face);
+                p.Property(p => p.Number);
+                p.Property(p => p.Photo);
             });
         }
     }
