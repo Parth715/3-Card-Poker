@@ -26,14 +26,14 @@ namespace _3_Card_Poker.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Player>>> GetPlayers()
         {
-            return await _context.Players.ToListAsync();
+            return await _context.Players.Include(x => x.Cards).ToListAsync();
         }
 
         // GET: api/Players/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Player>> GetPlayer(int id)
         {
-            var player = await _context.Players.FindAsync(id);
+            var player = await _context.Players.Include(x => x.Cards).SingleOrDefaultAsync(x => x.Id == id);
 
             if (player == null)
             {
