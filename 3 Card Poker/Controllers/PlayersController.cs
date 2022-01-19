@@ -42,7 +42,14 @@ namespace _3_Card_Poker.Controllers
 
             return player;
         }
-
+        [HttpPut("fold")]
+        public async Task<ActionResult> Fold()
+        {
+            var player = await _context.Players.FindAsync(1);
+            player.Outcome = "You folded and lost";
+            _context.SaveChanges();
+            return NoContent();
+        }
         // PUT: api/Players/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

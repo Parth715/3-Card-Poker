@@ -17,6 +17,7 @@ namespace _3_Card_Poker
                 p.HasKey(p => p.Id);
                 p.Property(p => p.Name);
                 p.Property(p => p.Balance);
+                p.Property(p => p.Outcome);
             });
             builder.Entity<Card>(p =>
             {
