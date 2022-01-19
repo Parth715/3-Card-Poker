@@ -7,6 +7,7 @@ namespace _3_Card_Poker.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public int Balance { get; set; }
+        public string? Outcome { get; set; }
         public virtual IEnumerable<Card> Cards { get; set; }
         public Player() { }
     }

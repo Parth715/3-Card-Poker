@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using _3_Card_Poker;
 
@@ -10,9 +11,10 @@ using _3_Card_Poker;
 namespace _3_Card_Poker.Migrations
 {
     [DbContext(typeof(PokerDbContext))]
-    partial class PokerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220119212053_Player outcome")]
+    partial class Playeroutcome
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
