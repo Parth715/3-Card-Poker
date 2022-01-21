@@ -58,20 +58,47 @@ namespace _3_Card_Poker.Controllers
             return NoContent();
         }
 
-        [HttpPut("check")]
+        [HttpPut("check/{player}")]
         public async Task<ActionResult> Check(Player player)
         {
-            List<Card> Dealer = new List<Card>();
-            List<Card> Guest = new List<Card>();
             Random random = new Random();
             for (var i = 1; i <= 3; i++)
             {
                 var card = random.Next(2, 54);
                 var play = await _context.Cards.FindAsync(card);
-                play.PlayerId = 4;
+                play.PlayerId = player.Id;
                 await _context.SaveChangesAsync();
             }
 
+            return NoContent();
+        }
+        [HttpPut("Hit/{player}")]
+        public async Task<ActionResult> Hit(Player player, Player dealer)
+        {
+            var hand = 0;
+            var dealer_hand = 0;
+            List<string> face = new List<string>();
+            List<int> cardnum = new List<int>();
+            List<string> Dface = new List<string>();
+            List<int> Dcardnum = new List<int>();
+            Random random = new Random();
+            for (var i = 1; i <= 3; i++)
+            {
+                var card = random.Next(2, 54);
+                var play = await _context.Cards.FindAsync(card);
+                play.PlayerId = dealer.Id;
+                await _context.SaveChangesAsync();
+            }
+            foreach(Card card in player.Cards)
+            {
+                face.Append(card.Face);
+                cardnum.Append(card.Number);
+            }
+            foreach (Card card in dealer.Cards)
+            {
+                Dface.Append(card.Face);
+                Dcardnum.Append(card.Number);
+            }
             return NoContent();
         }
         bool HighCard = false;
