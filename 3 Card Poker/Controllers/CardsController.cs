@@ -81,6 +81,12 @@ namespace _3_Card_Poker.Controllers
             bool Straight = false;
             bool ThreeOfKind = false;
             bool StraightFlush = false;
+            bool DHighCard = false;
+            bool DPair = false;
+            bool DFlush = false;
+            bool DStraight = false;
+            bool DThreeOfKind = false;
+            bool DStraightFlush = false;
             var hand = 0;
             var dealer_hand = 0;
             List<string> face = new List<string>();
@@ -138,6 +144,40 @@ namespace _3_Card_Poker.Controllers
             {
                 hand = 0;
                 HighCard = true;
+            }
+            //First if statement checks for straight, the second one is a straight flush FOR THE DEALER
+            if ((Dcardnum[1] + Dcardnum[2] + Dcardnum[3]) / 3 == Dcardnum[2])
+            {
+                dealer_hand = 3;
+                DStraight = true;
+                if (Dface[1] == Dface[2] && Dface[1] == Dface[3])
+                {
+                    dealer_hand = 5;
+                    DStraightFlush = true;
+                }
+            }
+            //This if statement checks if we have pair and then a 3 of a kind
+            if (Dcardnum[1] == Dcardnum[2] || Dcardnum[1] == Dcardnum[3] || Dcardnum[2] == Dcardnum[3])
+            {
+                dealer_hand = 1;
+                DPair = true;
+                if (Dcardnum[1] == Dcardnum[2] && Dcardnum[1] == Dcardnum[3])
+                {
+                    dealer_hand = 4;
+                    DThreeOfKind = true;
+                }
+            }
+            //this statement checks if we have a flush
+            if (Equals(face[1], face[2]) && Equals(face[1], face[3]))
+            {
+                dealer_hand = 2;
+                DFlush = true;
+            }
+            //if we don't have one of the previous hands then it will default to high card
+            if (DPair == false && DFlush == false && DStraight == false && DThreeOfKind == false && DStraightFlush == false)
+            {
+                dealer_hand = 0;
+                DHighCard = true;
             }
             return NoContent();
         }
