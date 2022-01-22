@@ -179,6 +179,16 @@ namespace _3_Card_Poker.Controllers
                 dealer_hand = 0;
                 DHighCard = true;
             }
+            //Assigns the winner
+            if(dealer_hand < hand)
+            {
+                player.Outcome = "You WON, you had the better hand!";
+            }
+            if (dealer_hand > hand)
+            {
+                player.Outcome = "You lost, dealer had the better hand!";
+            }
+            _context.SaveChanges();
             return NoContent();
         }
         
