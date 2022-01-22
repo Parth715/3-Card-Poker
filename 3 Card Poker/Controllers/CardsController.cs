@@ -75,6 +75,12 @@ namespace _3_Card_Poker.Controllers
         [HttpPut("Hit/{player}")]
         public async Task<ActionResult> Hit(Player player, Player dealer)
         {
+            bool HighCard = false;
+            bool Pair = false;
+            bool Flush = false;
+            bool Straight = false;
+            bool ThreeOfKind = false;
+            bool StraightFlush = false;
             var hand = 0;
             var dealer_hand = 0;
             List<string> face = new List<string>();
@@ -89,7 +95,7 @@ namespace _3_Card_Poker.Controllers
                 play.PlayerId = dealer.Id;
                 await _context.SaveChangesAsync();
             }
-            foreach(Card card in player.Cards)
+            foreach (Card card in player.Cards)
             {
                 face.Append(card.Face);
                 cardnum.Append(card.Number);
@@ -99,14 +105,42 @@ namespace _3_Card_Poker.Controllers
                 Dface.Append(card.Face);
                 Dcardnum.Append(card.Number);
             }
+            //First if statement checks for straight, the second one is a straight flush
+            if ((cardnum[1] + cardnum[2] + cardnum[3]) / 3 == cardnum[2])
+            {
+                hand = 3;
+                Straight = true;
+                if(face[1] == face[2] && face[1] == face[3])
+                {
+                    hand = 5;
+                    StraightFlush = true;
+                }
+            }
+            //This if statement checks if we have pair and then a 3 of a kind
+            if(cardnum[1] == cardnum[2] || cardnum[1] == cardnum[3] || cardnum[2] == cardnum[3])
+            {
+                hand = 1;
+                Pair = true;
+                if(cardnum[1] == cardnum[2] && cardnum[1] == cardnum[3])
+                {
+                    hand = 4;
+                    ThreeOfKind = true;
+                }
+                            }
+            //this statement checks if we have a flush
+            if(Equals(face[1], face[2]) && Equals(face[1], face[3]))
+            {
+                hand = 2;
+                Flush = true;
+            }
+            //if we don't have one of the previous hands then it will default to high card
+            if(Pair == false && Flush == false && Straight == false && ThreeOfKind == false && StraightFlush == false)
+            {
+                hand = 0;
+                HighCard = true;
+            }
             return NoContent();
         }
-        bool HighCard = false;
-        bool Pair = false;
-        bool Flush = false;
-        bool Straight = false;
-        bool ThreeOfKind = false;
-        bool StraightFlush = false;
-        bool RoyalFlush = false;
+        
     }
 }
