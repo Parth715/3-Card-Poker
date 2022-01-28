@@ -42,13 +42,13 @@ namespace _3_Card_Poker.Controllers
 
             return card;
         }
-        [HttpPut("reset")]//resets games to default values
-        public async Task<ActionResult> Reset()
+        [HttpPut("reset/{deck}")]//resets games to default values
+        public async Task<ActionResult> Reset(Player deck)
         {
             for (var i = 2; i <= 59; i++)
             {
                 var blank = await _context.Cards.FindAsync(i);
-                blank.PlayerId = 3;
+                blank.PlayerId = deck.Id;
                 await _context.SaveChangesAsync();
             }
             var player = await _context.Players.FindAsync(1);
@@ -57,7 +57,7 @@ namespace _3_Card_Poker.Controllers
             return NoContent();
         }
 
-        [HttpPut("Start")]//assigns player card and blank cards to dealer
+        [HttpPut("Start")]//assigns player card, blank cards to dealer, and 3 blank cards to the table
         public async Task<ActionResult> StartGame()
         {
             for(var i = 54; i <=56; i++)
