@@ -42,8 +42,22 @@ namespace _3_Card_Poker.Controllers
 
             return card;
         }
-        
-        [HttpPut("Start")]//assigns player card
+        [HttpPut("reset")]//resets games to default values
+        public async Task<ActionResult> Reset()
+        {
+            for (var i = 2; i <= 59; i++)
+            {
+                var blank = await _context.Cards.FindAsync(i);
+                blank.PlayerId = 3;
+                await _context.SaveChangesAsync();
+            }
+            var player = await _context.Players.FindAsync(1);
+            player.Outcome = "";
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpPut("Start")]//assigns player card and blank cards to dealer
         public async Task<ActionResult> StartGame()
         {
             for(var i = 54; i <=56; i++)
@@ -52,7 +66,13 @@ namespace _3_Card_Poker.Controllers
                 blank.PlayerId = 4;
                 await _context.SaveChangesAsync();
             }
-            
+            for (var i = 57; i <= 59; i++)
+            {
+                var blank = await _context.Cards.FindAsync(i);
+                blank.PlayerId = 5;
+                await _context.SaveChangesAsync();
+            }
+
             Random random = new Random();
             for(var i = 1; i <=3; i++)
             {
@@ -80,7 +100,7 @@ namespace _3_Card_Poker.Controllers
             return NoContent();
         }
         [HttpPut("Hit/{player}")]
-        public async Task<ActionResult> Hit(Player player, Player dealer)
+        public async Task<ActionResult> Hit(Player player)
         {
             bool HighCard = false;
             bool Pair = false;
@@ -101,6 +121,7 @@ namespace _3_Card_Poker.Controllers
             List<string> Dface = new List<string>();
             List<int> Dcardnum = new List<int>();
             Random random = new Random();
+            var dealer = await _context.Players.FindAsync(4);
             for (var i = 1; i <= 3; i++)
             {
                 var card = random.Next(2, 54);
