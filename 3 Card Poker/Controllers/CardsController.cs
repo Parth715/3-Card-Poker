@@ -85,18 +85,40 @@ namespace _3_Card_Poker.Controllers
             return NoContent();
         }
 
-        [HttpPut("check/{player}")]//pass in the dealer and he gets assigned cards
-        public async Task<ActionResult> Check(Player player)
+        [HttpPut("check/{dealer}")]//pass in the dealer and table and he gets assigned cards
+        public async Task<ActionResult> Check(Player dealer)
         {
+            var table = await _context.Players.FindAsync(5);
+            var deck = await _context.Players.FindAsync(3);
             Random random = new Random();
-            for (var i = 1; i <= 3; i++)
+            for (var i = 1; i <= 3; i+=0)
             {
                 var card = random.Next(2, 54);
                 var play = await _context.Cards.FindAsync(card);
-                play.PlayerId = player.Id;
+                if(play.PlayerId != 1 && play.PlayerId != 5)
+                {
+                    play.PlayerId = dealer.Id;
+                    await _context.SaveChangesAsync();
+                    i+=1;
+                }
+            }
+            for (var i = 1; i <= 3; i+=0)
+            {
+                var card = random.Next(2, 54);
+                var play = await _context.Cards.FindAsync(card);
+                if (play.PlayerId != 1 && play.PlayerId != 4)
+                {
+                    play.PlayerId = table.Id;
+                    await _context.SaveChangesAsync();
+                    i += 1;
+                }
+            }
+            for(var i = 54; i < 60; i++)
+            {
+                var card = await _context.Cards.FindAsync(i);
+                card.PlayerId = deck.Id;
                 await _context.SaveChangesAsync();
             }
-
             return NoContent();
         }
         [HttpPut("Hit/{player}")]
