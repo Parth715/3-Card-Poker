@@ -88,42 +88,26 @@ namespace _3_Card_Poker.Controllers
         [HttpPut("check/{dealer}")]//pass in the dealer and table and he gets assigned cards
         public async Task<ActionResult> Check(Player dealer)
         {
-            var table = await _context.Players.FindAsync(5);
+            var player = await _context.Players.FindAsync(1);
             var deck = await _context.Players.FindAsync(3);
             Random random = new Random();
-            for (var i = 1; i <= 3; i+=0)
+            for (var i = 1; i <= 3; i += 0)
             {
                 var card = random.Next(2, 54);
                 var play = await _context.Cards.FindAsync(card);
-                if(play.PlayerId != 1 && play.PlayerId != 5)
+                if (play.PlayerId != 1)
                 {
                     play.PlayerId = dealer.Id;
-                    await _context.SaveChangesAsync();
-                    i+=1;
-                }
-            }
-            for (var i = 1; i <= 3; i+=0)
-            {
-                var card = random.Next(2, 54);
-                var play = await _context.Cards.FindAsync(card);
-                if (play.PlayerId != 1 && play.PlayerId != 4)
-                {
-                    play.PlayerId = table.Id;
                     await _context.SaveChangesAsync();
                     i += 1;
                 }
             }
-            for(var i = 54; i < 60; i++)
+                  for (var i = 54; i < 60; i++)
             {
                 var card = await _context.Cards.FindAsync(i);
                 card.PlayerId = deck.Id;
                 await _context.SaveChangesAsync();
             }
-            return NoContent();
-        }
-        [HttpPut("Hit/{player}")]
-        public async Task<ActionResult> Hit(Player player)
-        {
             bool HighCard = false;
             bool Pair = false;
             bool Flush = false;
@@ -142,8 +126,6 @@ namespace _3_Card_Poker.Controllers
             List<int> cardnum = new List<int>();
             List<string> Dface = new List<string>();
             List<int> Dcardnum = new List<int>();
-            Random random = new Random();
-            var dealer = await _context.Players.FindAsync(4);
             for (var i = 1; i <= 3; i++)
             {
                 var card = random.Next(2, 54);
@@ -166,31 +148,31 @@ namespace _3_Card_Poker.Controllers
             {
                 hand = 3;
                 Straight = true;
-                if(face[1] == face[2] && face[1] == face[3])
+                if (face[1] == face[2] && face[1] == face[3])
                 {
                     hand = 5;
                     StraightFlush = true;
                 }
             }
             //This if statement checks if we have pair and then a 3 of a kind
-            if(cardnum[1] == cardnum[2] || cardnum[1] == cardnum[3] || cardnum[2] == cardnum[3])
+            if (cardnum[1] == cardnum[2] || cardnum[1] == cardnum[3] || cardnum[2] == cardnum[3])
             {
                 hand = 1;
                 Pair = true;
-                if(cardnum[1] == cardnum[2] && cardnum[1] == cardnum[3])
+                if (cardnum[1] == cardnum[2] && cardnum[1] == cardnum[3])
                 {
                     hand = 4;
                     ThreeOfKind = true;
                 }
-                            }
+            }
             //this statement checks if we have a flush
-            if(Equals(face[1], face[2]) && Equals(face[1], face[3]))
+            if (Equals(face[1], face[2]) && Equals(face[1], face[3]))
             {
                 hand = 2;
                 Flush = true;
             }
             //if we don't have one of the previous hands then it will default to high card
-            if(Pair == false && Flush == false && Straight == false && ThreeOfKind == false && StraightFlush == false)
+            if (Pair == false && Flush == false && Straight == false && ThreeOfKind == false && StraightFlush == false)
             {
                 hand = 0;
                 HighCard = true;
@@ -230,7 +212,7 @@ namespace _3_Card_Poker.Controllers
                 DHighCard = true;
             }
             //Assigns the winner
-            if(dealer_hand < hand)
+            if (dealer_hand < hand)
             {
                 player.Outcome = "You WON, you had the better hand!";
             }
@@ -238,9 +220,10 @@ namespace _3_Card_Poker.Controllers
             {
                 player.Outcome = "You lost, dealer had the better hand!";
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return NoContent();
+
         }
-        
+
     }
 }
