@@ -57,7 +57,7 @@ namespace _3_Card_Poker.Controllers
             return NoContent();
         }
 
-        [HttpPut("Start")]//assigns player card, blank cards to dealer, and 3 blank cards to the table
+        [HttpPut("Start")]//assigns player card, blank cards to dealer
         public async Task<ActionResult> StartGame()
         {
             for(var i = 54; i <=56; i++)
@@ -66,19 +66,18 @@ namespace _3_Card_Poker.Controllers
                 blank.PlayerId = 4;
                 await _context.SaveChangesAsync();
             }
-            for (var i = 57; i <= 59; i++)
-            {
-                var blank = await _context.Cards.FindAsync(i);
-                blank.PlayerId = 5;
-                await _context.SaveChangesAsync();
-            }
+            
 
             Random random = new Random();
-            for(var i = 1; i <=3; i++)
+            for(var i = 1; i <=3; i+=0)
             {
                 var card = random.Next(2, 54);
                 var play = await _context.Cards.FindAsync(card);
-                play.PlayerId = 1;
+                if (play.PlayerId != 1)
+                {
+                    play.PlayerId = 1;
+                    i++;
+                }
                 await _context.SaveChangesAsync();
             }
             
