@@ -76,20 +76,25 @@ namespace _3_Card_Poker.Controllers
                 if (play.PlayerId != 1)
                 {
                     play.PlayerId = 1;
+                    await _context.SaveChangesAsync();
                     i++;
                 }
-                await _context.SaveChangesAsync();
             }
-            
             return NoContent();
         }
 
         [HttpPut("check/{dealer}")] //dealer gets 3 cards
-        public async Task<ActionResult> Check(Player dealer)
+        public async Task<ActionResult<Player>> Check(Player dealer)
         {
-            var player = await _context.Players.FindAsync(1);
-            var deck = await _context.Players.FindAsync(3);
+            var player = await _context.Players.Include(x => x.Cards).SingleOrDefaultAsync(x => x.Id == 1);
+            var deck = await _context.Players.FindAsync(2);
             Random random = new Random();
+            foreach(var card in dealer.Cards)
+            {
+                card.PlayerId = deck.Id;
+                await _context.SaveChangesAsync();
+            }
+            dealer = await _context.Players.FindAsync(3);
             for (var i = 1; i <= 3; i += 0) //assigns dealer 3 different cards
             {
                 var card = random.Next(1, 53);
@@ -101,129 +106,176 @@ namespace _3_Card_Poker.Controllers
                     i += 1;
                 }
             }
-            for (var i = 53; i <= 55; i++)
-            {
-                var card = await _context.Cards.FindAsync(i);
-                card.PlayerId = deck.Id;
-                await _context.SaveChangesAsync();
-            }
-            bool HighCard = false;
+            dealer = await _context.Players.FindAsync(dealer.Id);
+            int HighCard = 0;
             bool Pair = false;
             bool Flush = false;
             bool Straight = false;
             bool ThreeOfKind = false;
             bool StraightFlush = false;
-            bool DHighCard = false;
+            int DHighCard = 0;
             bool DPair = false;
             bool DFlush = false;
             bool DStraight = false;
             bool DThreeOfKind = false;
             bool DStraightFlush = false;
+            var outcome = "";
+            var Doutcome = "";
             var hand = 0;
             var dealer_hand = 0;
             List<string> face = new List<string>();
             List<int> cardnum = new List<int>();
             List<string> Dface = new List<string>();
             List<int> Dcardnum = new List<int>();
-            for (var i = 1; i <= 3; i++)
-            {
-                var card = random.Next(2, 54);
-                var play = await _context.Cards.FindAsync(card);
-                play.PlayerId = dealer.Id;
-                await _context.SaveChangesAsync();
-            }
             foreach (Card card in player.Cards)
             {
-                face.Append(card.Face);
-                cardnum.Append(card.Number);
+                face.Add(card.Face);
+                cardnum.Add(card.Number);
             }
             foreach (Card card in dealer.Cards)
             {
-                Dface.Append(card.Face);
-                Dcardnum.Append(card.Number);
+                Dface.Add(card.Face);
+                Dcardnum.Add(card.Number);
             }
             cardnum.Sort();
             //First if statement checks for straight, the second one is a straight flush
-            if ((cardnum[1] + cardnum[2] + cardnum[3]) / 3 == cardnum[2])
+            if (cardnum[1]-cardnum[0] == 1 && cardnum[2]-cardnum[1]==1)
             {
                 hand = 3;
                 Straight = true;
-                if (face[1] == face[2] && face[1] == face[3])
+                outcome = "a straight";
+                if (face[0] == face[1] && face[0] == face[2])
                 {
                     hand = 5;
                     StraightFlush = true;
+                    outcome = "a straight flush";
                 }
             }
             //This if statement checks if we have pair and then a 3 of a kind
-            if (cardnum[1] == cardnum[2] || cardnum[1] == cardnum[3] || cardnum[2] == cardnum[3])
+            if (cardnum[0] == cardnum[1] || cardnum[0] == cardnum[2] || cardnum[1] == cardnum[2])
             {
                 hand = 1;
                 Pair = true;
-                if (cardnum[1] == cardnum[2] && cardnum[1] == cardnum[3])
+                outcome = "a pair";
+                if (cardnum[0] == cardnum[1] && cardnum[0] == cardnum[2])
                 {
                     hand = 4;
                     ThreeOfKind = true;
+                    outcome = "3 of a kind";
                 }
             }
             //this statement checks if we have a flush
-            if (Equals(face[1], face[2]) && Equals(face[1], face[3]))
+            if (Equals(face[0], face[1]) && Equals(face[0], face[2]))
             {
                 hand = 2;
                 Flush = true;
+                outcome = "a flush";
             }
             //if we don't have one of the previous hands then it will default to high card
             if (Pair == false && Flush == false && Straight == false && ThreeOfKind == false && StraightFlush == false)
             {
                 hand = 0;
-                HighCard = true;
+                HighCard = cardnum[2];
+                outcome = " better high card";
             }
             //First if statement checks for straight, the second one is a straight flush FOR THE DEALER
             Dcardnum.Sort();
-            if ((Dcardnum[1] + Dcardnum[2] + Dcardnum[3]) / 3 == Dcardnum[2])
+            if (Dcardnum[1] - Dcardnum[0] == 1 && Dcardnum[2] - Dcardnum[1] == 1)
             {
                 dealer_hand = 3;
                 DStraight = true;
-                if (Dface[1] == Dface[2] && Dface[1] == Dface[3])
+                Doutcome = "a straight";
+                if (Dface[0] == Dface[1] && Dface[0] == Dface[2])
                 {
                     dealer_hand = 5;
                     DStraightFlush = true;
+                    Doutcome = "a straight flush";
                 }
             }
             //This if statement checks if we have pair and then a 3 of a kind
-            if (Dcardnum[1] == Dcardnum[2] || Dcardnum[1] == Dcardnum[3] || Dcardnum[2] == Dcardnum[3])
+            if (Dcardnum[0] == Dcardnum[1] || Dcardnum[0] == Dcardnum[2] || Dcardnum[1] == Dcardnum[2])
             {
                 dealer_hand = 1;
                 DPair = true;
-                if (Dcardnum[1] == Dcardnum[2] && Dcardnum[1] == Dcardnum[3])
+                Doutcome = "a pair";
+                if (Dcardnum[0] == Dcardnum[1] && Dcardnum[0] == Dcardnum[2])
                 {
                     dealer_hand = 4;
                     DThreeOfKind = true;
+                    Doutcome = "3 of a kind";
                 }
             }
             //this statement checks if we have a flush
-            if (Equals(face[1], face[2]) && Equals(face[1], face[3]))
+            if (Equals(Dface[0], Dface[1]) && Equals(Dface[0], Dface[2]))
             {
                 dealer_hand = 2;
                 DFlush = true;
+                Doutcome = "a flush";
             }
             //if we don't have one of the previous hands then it will default to high card
             if (DPair == false && DFlush == false && DStraight == false && DThreeOfKind == false && DStraightFlush == false)
             {
                 dealer_hand = 0;
-                DHighCard = true;
+                DHighCard = Dcardnum[2];
+                Doutcome = "a better high card";
             }
             //Assigns the winner
+            if (dealer_hand == hand)
+            {
+                if (Dcardnum[2] < cardnum[2])
+                {
+
+                    player.Outcome = $"You WON, you had {outcome}";
+                    await _context.SaveChangesAsync();
+                }
+                if (Dcardnum[2] > cardnum[2])
+                {
+                    player.Outcome = $"You lost, dealer had {Doutcome}";
+                    await _context.SaveChangesAsync();
+                }
+                if (Dcardnum[1] < cardnum[1]){
+                    
+                    player.Outcome = $"You WON, you had {outcome}";
+                    await _context.SaveChangesAsync();
+                }
+                if (Dcardnum[1] > cardnum[1]){
+                    player.Outcome = $"You lost, dealer had {Doutcome}";
+                    await _context.SaveChangesAsync();
+                }
+                if (DHighCard < HighCard)
+                {
+                    player.Outcome = $"You WON, you had {outcome}";
+                    await _context.SaveChangesAsync();
+                }
+                if(DHighCard > HighCard)
+                {
+                    player.Outcome = $"You lost, dealer had {Doutcome}";
+                    await _context.SaveChangesAsync();
+                }
+            }
             if (dealer_hand < hand)
             {
-                player.Outcome = "You WON, you had the better hand!";
+                player.Outcome = $"You WON, you had {outcome}";
                 await _context.SaveChangesAsync();
             }
             if (dealer_hand > hand)
             {
-                player.Outcome = "You lost, dealer had the better hand!";
+                player.Outcome = $"You lost, dealer had {Doutcome}";
                 await _context.SaveChangesAsync();
             }
-            return NoContent();
+            if(Pair = true && DPair == true) 
+            {
+                if (cardnum[1] < Dcardnum[1])
+                {
+                    player.Outcome = $"You lost, dealer had {Doutcome}";
+                }
+                if(cardnum[1] > Dcardnum[1])
+                {
+                    player.Outcome = $"You WON, you had {outcome}";
+                }
+            }
+            
+            return await _context.Players.FindAsync(dealer.Id);
 
         }
 
