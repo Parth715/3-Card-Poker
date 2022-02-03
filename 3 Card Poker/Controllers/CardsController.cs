@@ -45,7 +45,7 @@ namespace _3_Card_Poker.Controllers
         [HttpPut("reset/{deck}")]//resets games to default values
         public async Task<ActionResult> Reset(Player deck)
         {
-            for (var i = 2; i <= 59; i++)
+            for (var i = 1; i <= 55; i++)
             {
                 var blank = await _context.Cards.FindAsync(i);
                 blank.PlayerId = deck.Id;
@@ -60,18 +60,18 @@ namespace _3_Card_Poker.Controllers
         [HttpPut("Start")]//assigns player card, blank cards to dealer
         public async Task<ActionResult> StartGame()
         {
-            for(var i = 54; i <=56; i++)
+            for(var i = 53; i <=55; i++)
             {
                 var blank = await _context.Cards.FindAsync(i);
-                blank.PlayerId = 4;
+                blank.PlayerId = 3;
                 await _context.SaveChangesAsync();
             }
             
 
             Random random = new Random();
-            for(var i = 1; i <=3; i+=0)
+            for(var i = 1; i <=3; i+=0)//assigns 3 different cards to player
             {
-                var card = random.Next(2, 54);
+                var card = random.Next(1, 53);
                 var play = await _context.Cards.FindAsync(card);
                 if (play.PlayerId != 1)
                 {
@@ -84,24 +84,24 @@ namespace _3_Card_Poker.Controllers
             return NoContent();
         }
 
-        [HttpPut("check/{dealer}")]//pass in the dealer and table and he gets assigned cards
+        [HttpPut("check/{dealer}")] //dealer gets 3 cards
         public async Task<ActionResult> Check(Player dealer)
         {
             var player = await _context.Players.FindAsync(1);
             var deck = await _context.Players.FindAsync(3);
             Random random = new Random();
-            for (var i = 1; i <= 3; i += 0)
+            for (var i = 1; i <= 3; i += 0) //assigns dealer 3 different cards
             {
-                var card = random.Next(2, 54);
+                var card = random.Next(1, 53);
                 var play = await _context.Cards.FindAsync(card);
-                if (play.PlayerId != 1)
+                if (play.PlayerId != 1 && play.PlayerId != dealer.Id)
                 {
                     play.PlayerId = dealer.Id;
                     await _context.SaveChangesAsync();
                     i += 1;
                 }
             }
-                  for (var i = 54; i < 60; i++)
+            for (var i = 53; i <= 55; i++)
             {
                 var card = await _context.Cards.FindAsync(i);
                 card.PlayerId = deck.Id;
@@ -142,6 +142,7 @@ namespace _3_Card_Poker.Controllers
                 Dface.Append(card.Face);
                 Dcardnum.Append(card.Number);
             }
+            cardnum.Sort();
             //First if statement checks for straight, the second one is a straight flush
             if ((cardnum[1] + cardnum[2] + cardnum[3]) / 3 == cardnum[2])
             {
@@ -177,6 +178,7 @@ namespace _3_Card_Poker.Controllers
                 HighCard = true;
             }
             //First if statement checks for straight, the second one is a straight flush FOR THE DEALER
+            Dcardnum.Sort();
             if ((Dcardnum[1] + Dcardnum[2] + Dcardnum[3]) / 3 == Dcardnum[2])
             {
                 dealer_hand = 3;
@@ -214,12 +216,13 @@ namespace _3_Card_Poker.Controllers
             if (dealer_hand < hand)
             {
                 player.Outcome = "You WON, you had the better hand!";
+                await _context.SaveChangesAsync();
             }
             if (dealer_hand > hand)
             {
                 player.Outcome = "You lost, dealer had the better hand!";
+                await _context.SaveChangesAsync();
             }
-            await _context.SaveChangesAsync();
             return NoContent();
 
         }
